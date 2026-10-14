@@ -1,18 +1,141 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OfferPk App Factory — Live Dashboard</title><link rel="stylesheet" href="style.css"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1020">
+  <meta name="description" content="A live overview of OfferPk apps, builds, pull requests, demos, and Android releases.">
+  <title>OfferPk App Factory — Release Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<header><div><h1>🏭 OfferPk App Factory</h1><p class="sub">Live build dashboard · auto-refresh every 60s</p></div>
-<div class="meta"><span id="updated">Loading…</span><button id="refresh">↻ Refresh</button></div></header>
-<div id="notice" class="notice hidden"></div>
-<section class="summary">
-<div class="card stat"><span id="s-apps">–</span><label>Total apps</label></div>
-<div class="card stat ok"><span id="s-pass">–</span><label>Builds passing</label></div>
-<div class="card stat bad"><span id="s-fail">–</span><label>Builds failing</label></div>
-<div class="card stat run"><span id="s-run">–</span><label>Running now</label></div>
-<div class="card stat"><span id="s-pr">–</span><label>Open PRs</label></div>
-</section>
-<section id="now" class="card now hidden"></section>
-<section id="grid" class="grid"></section>
-<footer>Data from the public GitHub API · times in PKT (Asia/Karachi) · <span id="rate"></span></footer>
-<script src="app.js"></script></body></html>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="OfferPk App Factory home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 3.5 35 12v16L20 36.5 5 28V12L20 3.5Z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M13 25V15h6.2a3.2 3.2 0 0 1 0 6.4H13m8.5 3.6 5.2-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <span class="brand-name">OfferPk <span>App Factory</span></span>
+          <span class="brand-caption">Release intelligence</span>
+        </span>
+      </a>
+
+      <div class="topbar-actions">
+        <div class="connection-pill" aria-live="polite">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span id="updated">Connecting to GitHub…</span>
+        </div>
+        <button id="refresh" class="refresh-button" type="button" aria-label="Refresh dashboard data">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M16.4 8A6.6 6.6 0 0 0 4.8 5.7L3.5 7M3.5 7V3.8M3.5 7h3.2M3.6 12a6.6 6.6 0 0 0 11.6 2.3l1.3-1.3m0 0v3.2m0-3.2h-3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span> LIVE RELEASE DASHBOARD</p>
+          <h1 id="page-title">Every app.<br><span>One clear view.</span></h1>
+          <p class="hero-description">See what shipped, what passed, and what needs attention across the OfferPk portfolio.</p>
+        </div>
+        <aside class="hero-note" aria-label="Dashboard update schedule">
+          <span class="hero-note-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M12 7v5l3.2 1.8M15.5 3.8h4.7v4.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="hero-note-copy">
+            <span class="hero-note-label">PORTFOLIO PULSE</span>
+            <strong>Always close to the latest</strong>
+            <span class="hero-note-text">Status refreshes automatically every 60 seconds.</span>
+          </span>
+          <span class="hero-note-orbit" aria-hidden="true"></span>
+        </aside>
+      </section>
+
+      <section class="summary" aria-label="Portfolio summary">
+        <article class="metric-card metric-total">
+          <div class="metric-top"><span class="metric-label">TOTAL APPS</span><span class="metric-icon" aria-hidden="true">01</span></div>
+          <strong id="s-apps" class="metric-value">—</strong>
+          <span class="metric-note">Tracked in the portfolio</span>
+        </article>
+        <article class="metric-card metric-pass">
+          <div class="metric-top"><span class="metric-label">BUILDS PASSING</span><span class="metric-icon" aria-hidden="true">✓</span></div>
+          <strong id="s-pass" class="metric-value">—</strong>
+          <span class="metric-note">Latest checks look good</span>
+        </article>
+        <article class="metric-card metric-fail">
+          <div class="metric-top"><span class="metric-label">BUILDS FAILING</span><span class="metric-icon" aria-hidden="true">!</span></div>
+          <strong id="s-fail" class="metric-value">—</strong>
+          <span class="metric-note">May need a closer look</span>
+        </article>
+        <article class="metric-card metric-running">
+          <div class="metric-top"><span class="metric-label">RUNNING NOW</span><span class="metric-icon" aria-hidden="true"><span class="mini-pulse"></span></span></div>
+          <strong id="s-run" class="metric-value">—</strong>
+          <span class="metric-note">Checks currently in progress</span>
+        </article>
+        <article class="metric-card metric-pr">
+          <div class="metric-top"><span class="metric-label">OPEN PRS</span><span class="metric-icon" aria-hidden="true">↗</span></div>
+          <strong id="s-pr" class="metric-value">—</strong>
+          <span class="metric-note">Across all tracked apps</span>
+        </article>
+      </section>
+
+      <div id="notice" class="notice hidden" role="status" aria-live="polite"></div>
+      <section id="now" class="spotlight hidden" aria-label="Most recently updated app"></section>
+
+      <section class="portfolio" aria-labelledby="portfolio-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow section-eyebrow"><span class="eyebrow-line" aria-hidden="true"></span> YOUR PORTFOLIO</p>
+            <h2 id="portfolio-title">App inventory</h2>
+          </div>
+          <span id="grid-count" class="grid-count" aria-live="polite">Loading apps…</span>
+        </div>
+
+        <div class="portfolio-tools">
+          <label class="search-box">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="8.8" cy="8.8" r="5.8" stroke="currentColor" stroke-width="1.6"/>
+              <path d="m13.2 13.2 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <span class="sr-only">Search apps</span>
+            <input id="search" type="search" autocomplete="off" placeholder="Search apps by name or description…">
+            <span class="search-hint" aria-hidden="true">⌕</span>
+          </label>
+          <span class="api-summary"><span class="api-summary-dot" aria-hidden="true"></span><span id="rate">Public GitHub API</span></span>
+        </div>
+
+        <div id="grid" class="grid" aria-busy="true">
+          <div class="loading-state"><span class="loading-spinner" aria-hidden="true"></span>Fetching app status…</div>
+        </div>
+        <div id="empty" class="empty-state hidden">
+          <span class="empty-mark" aria-hidden="true">⌕</span>
+          <h3 id="empty-title">No matching apps</h3>
+          <p id="empty-copy">Try another name or search term.</p>
+          <button id="clear-search" class="text-button hidden" type="button">Clear search</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span class="footer-brand"><span class="footer-dot" aria-hidden="true"></span>OfferPk App Factory</span>
+      <span>Public GitHub API · Times shown in PKT (Asia/Karachi)</span>
+      <span class="footer-note">A clearer view of what ships next.</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
