@@ -1,7 +1,7 @@
 // OfferPk App Factory dashboard. Public GitHub API only, no token.
 // Uses ETag conditional requests (304s don't count toward the 60/hr limit) + localStorage cache.
 const OWNER='OfferPk',API='https://api.github.com',SELF='app-factory-dashboard';
-const DETAIL_TTL=10*60e3, REFRESH=60e3;
+const DETAIL_TTL=10*60e3, REFRESH=60e3, DETAIL_N=12, MIN_LEFT=6;
 const LS=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}};
 const SS=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 let rate={remaining:'?',reset:0}, limited=false;
@@ -31,6 +31,7 @@ async function details(repo){
   const prev=LS('d:'+repo.name);
   const need=!prev||prev.pushed!==repo.pushed_at||!fresh(p+'/actions/runs?per_page=30')||prev.running;
   if(!need) return prev;
+  if(limited||(rate.remaining!=='?'&&+rate.remaining<MIN_LEFT)) return prev||{wf:[],prs:0,msg:'',ctime:repo.pushed_at};
   const [commits,runs,pulls]=await Promise.all([
     gh(p+'/commits?per_page=1'), gh(p+'/actions/runs?per_page=30'), gh(p+'/pulls?state=open&per_page=100')]);
   const latest={}; for(const r of (runs&&runs.workflow_runs)||[]) if(!latest[r.name]) latest[r.name]=r;
@@ -60,7 +61,7 @@ async function load(){
     let repos=await gh(`/users/${OWNER}/repos?per_page=100&sort=pushed`);
     if(!repos) throw new Error('no data');
     repos=repos.filter(r=>!r.fork&&r.name!==SELF).sort((a,b)=>new Date(b.pushed_at)-new Date(a.pushed_at));
-    const ds=[]; for(const r of repos) ds.push(await details(r).catch(()=>LS('d:'+r.name)||{wf:[],prs:0}));
+    const ds=[]; for(const [i,r] of repos.entries()) ds.push(i>=DETAIL_N?(LS('d:'+r.name)||{wf:[],prs:0,msg:'(details for the 12 most recent apps only)',ctime:r.pushed_at}):await details(r).catch(()=>LS('d:'+r.name)||{wf:[],prs:0}));
     let pass=0,fail=0,run=0,prs=0;
     ds.forEach(d=>{prs+=d.prs||0;const b=(d.wf||[]).filter(w=>w.name!=='Pages');if(b.some(w=>w.k==='running'))run++;else if(b.some(w=>w.k==='failure'))fail++;else if(b.some(w=>w.k==='success'))pass++;});
     const set=(id,v)=>document.getElementById(id).textContent=v;
