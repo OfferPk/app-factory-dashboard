@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OfferPk App Factory — Live Dashboard</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div><h1>🏭 OfferPk App Factory</h1><p class="sub">Live build dashboard · auto-refresh every 60s</p></div>
+<div class="meta"><span id="updated">Loading…</span><button id="refresh">↻ Refresh</button></div></header>
+<div id="notice" class="notice hidden"></div>
+<section class="summary">
+<div class="card stat"><span id="s-apps">–</span><label>Total apps</label></div>
+<div class="card stat ok"><span id="s-pass">–</span><label>Builds passing</label></div>
+<div class="card stat bad"><span id="s-fail">–</span><label>Builds failing</label></div>
+<div class="card stat run"><span id="s-run">–</span><label>Running now</label></div>
+<div class="card stat"><span id="s-pr">–</span><label>Open PRs</label></div>
+</section>
+<section id="now" class="card now hidden"></section>
+<section id="grid" class="grid"></section>
+<footer>Data from the public GitHub API · times in PKT (Asia/Karachi) · <span id="rate"></span></footer>
+<script src="app.js"></script></body></html>
